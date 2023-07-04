@@ -1,0 +1,17 @@
+Testing:
+- Test/*
+Agent:
+- src/Agent/**
+Env:
+- src/Base/**/env.py
+Graphics:
+- src/Base/**/env.py
+- src/Base/**/_render_func.py
+System:
+- '*.py'
+- src/Log/**
+- .github/**
+Document:
+- '**/*.md'
+- '**/*.txt'
+- '**/*.docs'

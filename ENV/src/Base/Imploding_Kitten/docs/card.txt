@@ -1,0 +1,20 @@
+Index[0:56]: 76 card: 19 type
+    [0:5]: Nope
+    [5:9]: Attack
+    [9:13]: Skip
+    [13:17]: Favor
+    [17:21]: Shuffle
+    [21:26]: See the future
+    [26:30]: TACOCAT
+    [30:34]: RAINBOW-RALPHING CAT
+    [34:38]: BEARD CAT
+    [38:42]: HAIRY POTATO CAT
+    [42:46]: CATERMELON
+    [46:50]: Reverse
+    [50:54]: Draw From Bottom
+    [54:58]:  Feral Cat
+    [58:62]: Alter the Future
+    [62:65]: Targeted Attack
+    [65:71]: Defuse
+    [71:75]: Exploding kitten
+    [75]: Imploding Kitten

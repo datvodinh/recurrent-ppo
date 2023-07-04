@@ -1,0 +1,34 @@
+state[0:17]:number of card player hold:
+    [0]: Nope
+    [1]: Attack
+    [2]: Skip
+    [3]: Favor
+    [4]: Shuffle
+    [5]: See the future
+    [6]: TACOCAT
+    [7]: RAINBOW-RALPHING CAT
+    [8]: BEARD CAT
+    [9]: HAIRY POTATO CAT
+    [10]: CATERMELON
+    [11]: Reverse
+    [12]: Draw from Bottom
+    [13]: Feral Cat
+    [14]: Alter the Future
+    [15]: Targeted Attack
+    [16]: Defuse
+state[17:35]:number of card in Discard Pile (same index as state[0:17],state[34]:Exploding card)
+state[35]: number of card left in the Draw Pile
+state[36]: number of player left
+state[37]: 1 if player card is Nope by other player else 0
+state[38:57]:first card (See the future)
+state[57:76]:second card (See the future)
+state[76:95]:third card (See the future)
+state[95:100]:  {main turn,nope turn,steal turn, choose/take card turn}
+state[100]: number of card player have to draw
+state[101:116]: main player last action.
+state[116:121]: other player lose or not(1 if not lose else 0)
+state[121](86): Exploding (0 if explode else 1)
+state[122:127]: number of card other player have (0 if lose or dont have card)
+state[127]:check if Imploding Kitten explode or not(1 if explode else 0)
+state[128:144]: card that have been discard
+state[144]: number of card player have to discard

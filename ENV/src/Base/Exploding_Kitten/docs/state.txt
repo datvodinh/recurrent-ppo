@@ -1,0 +1,29 @@
+state[0:12]:number of card player hold:
+    [0]: Nope
+    [1]: Attack
+    [2]: Skip
+    [3]: Favor
+    [4]: Shuffle
+    [5]: See the future
+    [6]: TACOCAT
+    [7]: RAINBOW-RALPHING CAT
+    [8]: BEARD CAT
+    [9]: HAIRY POTATO CAT
+    [10]: CATERMELON
+    [11]: Defuse
+
+state[12:25]:number of card in Discard Pile (same index as state[0:12],state[24]:Exploding card)
+state[25]: number of card left in the Draw Pile
+state[26]: number of player left
+state[27]: 1 if player card is Nope by other player else 0
+state[28:41]:first card (See the future)
+state[41:54]:second card (See the future)
+state[54:67]:third card (See the future)
+state[67:71]:  {main turn,nope turn,steal turn, choose/take card turn} (discard phase if sum(state[67:71])==0)
+state[71]: number of card player have to draw
+state[72:82]: main player last action.
+state[82:86]: other player lose or not(1 if not lose else 0)
+state[86]: Exploding (0 if explode else 1)
+state[87:91]: number of card other player have (0 if lose or dont have card)
+state[91:102]: card that have been discard
+state[102]: number of card player have to discard

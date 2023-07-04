@@ -1,0 +1,676 @@
+{
+ "Splendor_v2": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316,
+    6157
+   ],
+   [
+    "TimeBasedAlgorithm",
+    "ActionsLayer",
+    "MultiDimensionAlgorithm"
+   ]
+  ],
+  "-1": [
+    [
+     1,
+     1,
+     1
+    ],
+    [
+     9140,
+     5224,
+     8316
+    ],
+    [
+     "DQ",
+     "TD",
+     "VA"
+    ]
+   ]
+ },
+ "Splendor_v3": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    8316,
+    6157
+   ],
+   [
+    "KhanhNhat",
+    "StateBasedAlgorithm",
+    "MultiDimensionAlgorithm"
+   ]
+  ],
+  "-1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316,
+    6157
+   ],
+   [
+    "PT",
+    "TD",
+    "VA"
+   ]
+  ]
+ },
+ "TLMN": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316,
+    6157
+   ],
+   [
+    "StateBasedAlgorithm",
+    "An",
+    "KhanhNhat"
+   ]
+  ],
+  "-1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    8316,
+    6157
+   ],
+   [
+    "DQ",
+    "PT",
+    "VA"
+   ]
+  ]
+ },
+ "MachiKoro": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "TimeBasedAlgorithm",
+    "KhanhNhat",
+    "ActionsLayer"
+   ]
+  ],
+  "-1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "DQ",
+    "PT",
+    "VA"
+   ]
+  ]
+ },
+ "Catan": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "An",
+    "BiasAlgorithm",
+    "TimeBasedAlgorithm"
+   ]
+  ],
+  "-1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "DQ",
+    "TD",
+    "VA"
+   ]
+  ]
+ },
+ "SushiGo": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "MultiDimensionAlgorithm",
+    "Chain3",
+    "BiasAlgorithm",
+    "StateBasedAlgorithm"
+   ]
+  ],
+  "-1": [
+    [
+     1,
+     1,
+     1
+    ],
+    [
+     9140,
+     5224,
+     8316
+    ],
+    [
+     "DQ",
+     "TD",
+     "VA",
+     "PT"
+    ]
+   ]
+ },
+ "Splendor": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "MultiDimensionAlgorithm",
+    "ActionsLayer",
+    "BiasAlgorithm"
+   ]
+  ],
+  "-1": [
+    [
+     1,
+     1,
+     1
+    ],
+    [
+     9140,
+     5224,
+     8316
+    ],
+    [
+     "DQ",
+     "TD",
+     "VA"
+    ]
+   ]
+ },
+ "StoneAge": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "BiasAlgorithm",
+    "MultiDimensionAlgorithm",
+    "ActionsLayer"
+   ]
+  ],
+  "-1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "DQ",
+    "PT",
+    "TD"
+   ]
+  ]
+ },
+ "Century": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "MultiDimensionAlgorithm",
+    "StateBasedAlgorithm",
+    "BiasAlgorithm",
+    "An"
+   ]
+  ],
+  "-1": [
+   [
+    1,
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "DQ",
+    "PT",
+    "TD",
+    "VA"
+   ]
+  ]
+ },
+ "Sheriff": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "An",
+    "StateBasedAlgorithm",
+    "BiasAlgorithm"
+   ]
+  ],
+  "-1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "PT",
+    "TD",
+    "VA"
+   ]
+  ]
+ },
+ "Durak": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "ActionsLayer",
+    "KhanhNhat",
+    "StateBasedAlgorithm"
+   ]
+  ]
+ },
+ "Imploding_Kitten": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "KhanhNhat",
+    "An",
+    "MultiDimensionAlgorithm",
+    "StateBasedAlgorithm",
+    "BiasAlgorithm"
+   ]
+  ]
+ },
+ "Exploding_Kitten": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "TimeBasedAlgorithm",
+    "An",
+    "StateBasedAlgorithm",
+    "MultiDimensionAlgorithm"
+   ]
+  ]
+ },
+ "Phom": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+     "BiasAlgorithm",
+     "MultiDimensionAlgorithm",
+     "TimeBasedAlgorithm"
+   ]
+  ]
+ },
+ "CatanNoExchange": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+     "TimeBasedAlgorithm",
+     "BiasAlgorithm",
+     "An"
+   ]
+  ],
+  "-1": [
+   [],
+   [],
+   [
+    "agentCatanNoChange",
+    "agentCatanNoExchange2",
+    "player_catan_no_exchange"
+   ]
+  ]
+ },
+ "Poker": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+     "Y_random",
+     "Y_random",
+     "Y_random",
+     "Y_random",
+     "Y_random",
+     "Y_random",
+     "Y_random",
+     "Y_random",
+     "Y_random"
+   ]
+  ]
+ },
+ "TicketToRide": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+     "MultiDimensionAlgorithm",
+     "BiasAlgorithm",
+     "TimeBasedAlgorithm",
+     "StateBasedAlgorithm"
+   ]
+  ]
+ },
+ "GoFish": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+    "Y_random",
+    "Y_random",
+    "Y_random"
+   ]
+  ],
+  "-1": [
+   [],
+   [],
+   [
+    "agentGoFish",
+    "agentGoFish2",
+    "AgentGoFish3"
+   ]
+  ]
+ },
+ "WelcomeToTheDungeon_v1": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [
+     "ActionsLayer",
+     "An",
+     "MultiDimensionAlgorithm"
+   ]
+  ],
+  "-1": [
+   [],
+   [],
+   [
+    "agentWelcomeToDungeon",
+    "agentWTTD_v1",
+    "agentWTTD_v1"
+   ]
+  ]
+ },
+ "WelcomeToTheDungeon_v2": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [ "An",
+    "ActionsLayer",
+    "MultiDimensionAlgorithm"
+   ]
+  ],
+  "-1": [
+   [],
+   [],
+   [
+    "AgentWCTDv2",
+    "agentWTTD_v2",
+    "player_welcome_to_the_dungeon_v2"
+   ]
+  ]
+ },
+ "Fantan": {
+  "Can_Split_Level": "False",
+  "level_max": 1,
+  "1": [
+   [
+    1,
+    1,
+    1
+   ],
+   [
+    9140,
+    5224,
+    8316
+   ],
+   [ "ActionsLayer",
+    "BiasAlgorithm",
+    "KhanhNhat"
+   ]
+  ],
+  "-1": [
+   [],
+   [],
+   [
+    "agentFanTan",
+    "AgentFantan2",
+    "player_fantan"
+   ]
+  ]
+ }
+}

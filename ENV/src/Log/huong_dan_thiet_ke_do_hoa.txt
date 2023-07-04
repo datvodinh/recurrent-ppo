@@ -1,0 +1,52 @@
+Link hệ thống mẫu (game TLMN): https://github.com/AnnNguy3n/IntGfxENV.git
+
+Tổng thời gian thực hiện: 4 tiếng - 10 tiếng (phụ thuộc vào khiếu thiết kế và độ thành thạo)
+
+Các bước thiết kế hệ thống đồ họa sử dụng template có sẵn:
+1. Chỉnh sửa file env.py:
+	1.1. Viết thêm hàm load_agent (5 phút)
+		Input: level, *args
+		Output: list_bot_level, list_per_level
+		
+		Cách thực hiện: thực ra ở hàm run có một đoạn code dùng để load các agent theo level. Có thể sử dụng luôn đoạn code này cho hàm load_agent (xem hệ thống mẫu).
+	
+	1.2. Đổi tên file thành _env.py (1 phút)
+
+2. Tạo file _render_func.py và viết các hàm bắt buộc
+	File này sẽ đặt cùng cấp thư mục với file _env.py.
+	Các hàm bắt buộc bao gồm:
+		2.1. get_state_image (3 tiếng - 7 tiếng, tùy khiếu thiết kế)
+			Input: state (giá trị mặc định: None)
+			Output: Nếu state là None, chỉ cần trả ra hình nền
+				Nếu state không None, trả ra ảnh thể hiện state tương ứng
+			
+			Ảnh trả ra phải được Colab hỗ trợ hiển thị tại Output Cell. PIL (pillow) là một thư viện xử lí hình ảnh, được Colab hỗ trợ
+		
+		2.2. get_description (15 phút)
+			Input: action
+			Output: String mô trả ý nghĩa của action tương ứng (ngắn gọn, dễ hiểu)
+			
+			Nếu action truyền vào không nằm trong tập action, trả ra một string rỗng
+		
+		2.3. get_env_components (15 phút)
+			Input: Không
+			Output: trả ra một object chứa tất cả các thành phần của môi trường.
+
+			Object được trả ra chứa thông tin về trạng thái hiện tại của môi trường.
+		
+		2.4. get_main_player_state (30 phút)
+			Input: env_components, list_agent, list_data, action (giá trị mặc định: None)
+			Output: win, state, new_env_components
+			
+			Mô tả input:	env_components: Các thành phần của môi trường
+					list_agent: Danh sách các agent trong hệ thống
+					list_data: Danh sách data của các agent trong hệ thống
+
+			Mô tả output:	win: cho biết rằng người chơi chính đã chiến thắng hay chưa
+					state: trạng thái tiếp theo mà người chơi chính nhận được
+					new_env_components: các thành phần của môi trường sau khi xử lí
+
+			Nếu action là None, tức là bàn chơi ở trạng thái khởi đầu, chưa có ai action gì cả
+			Nếu action không None, thì đó là action của người chơi chính vừa mới thực hiện.
+
+3. Copy file env.py mới và file _render.py, chỉnh sửa đường link khi import các file lẫn nhau (5 phút)

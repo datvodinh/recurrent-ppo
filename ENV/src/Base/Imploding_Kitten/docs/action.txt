@@ -1,0 +1,38 @@
+Action index: 10 action
+Phase 1: Main turn
+    Action 0-9:
+    Action 0: Nope
+    Action 1: Attack
+    ACtion 2: Skip
+    Action 3: Favor
+    Action 4: Shuffle
+    Action 5: See the future
+    Action 6: Draw card(end turn).
+    Action 7: Steal a random card from other player (two of a kind).
+    Action 8: Name the card you want from other player(three of a kind).
+    Action 9: take any card from Discard Pile (5 different cards).
+    Action 11: Reverse
+    Action 12: Draw From Bottom
+    Action 13: Alter the Future
+    Action 14: Targeted Attack
+
+Phase 2: Nope turn.
+    Action 0: Nope
+    Action 10: Not Nope
+
+
+Phase 3: choose PLayer
+        Action 15 to 10:  choose player to take / attack. (5 action)
+Phase 4: choose card to give / take
+    Action 3: 
+        Action 20 to 37: player been chosen choose a card to give.. (17 action)
+    Action 8:
+        Action 37 to 54: ask the card you want from other player (17 action)
+    Action 9:
+        Action 54 to 71: choose card from Discard Pile (17 action)
+Phase 5: Alter the Future
+        3! = 6 combination of card
+        Action 71 to 77: All 6 combination to Alter.  (6 action)
+
+Phase 6: Discard phase:
+    Action 77 to 93: Discard card (index respect to card.txt).

@@ -1,0 +1,14 @@
+name: Labeling new issue
+on:
+  issues:
+      types: ['opened']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Renato66/auto-label@master
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          labels-synonyms: '{"bug":["error","need fix","not working"],"enhancement":["upgrade"],"question":["help","how can i"]}'
+          labels-not-allowed: '["documentation","duplicate","good first issue","help wanted","invalid"]'
+          default-labels: '["triage"]'
