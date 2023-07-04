@@ -1,1 +1,0 @@
-Contact us: quynhtrang.vis@gmail.com
