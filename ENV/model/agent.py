@@ -11,9 +11,20 @@ class Agent():
         self.env                = env
         self.model              = model
         self.reward             = config["rewards"]
-        self.rollout            = RolloutBuffer(config["seq_length"],config["max_eps_length"],config["num_game_per_batch"],env.getStateSize(),env.getActionSize())
-        self.h_state            = None
-        self.c_state            = None
+        self.max_eps_length     = config["max_eps_length"]
+        self.rollout            = RolloutBuffer(config,env.getStateSize(),env.getActionSize())
+        self.h_state            = torch.zeros(1,1,config["hidden_size"])
+        self.c_state            = torch.zeros(1,1,config["hidden_size"])
+        self.hidden_size        = config["hidden_size"]
+
+    def reset_hidden(self):
+        """
+        Overview:
+            Reset Hidden State and Candidate State
+        """
+        self.h_state            = torch.zeros(1,1,self.hidden_size)
+        self.c_state            = torch.zeros(1,1,self.hidden_size)
+
     def play(self,state,per):
         """
         Overview:
@@ -30,10 +41,10 @@ class Agent():
         self.model.eval()
         with torch.no_grad():
             tensor_state = torch.tensor(state.reshape(1,1,-1),dtype=torch.float32)
-            policy,value,self.h_state,self.c_state = self.model(tensor_state,self.h_state,self.c_state)
+            policy,value,h,c = self.model(tensor_state,self.h_state,self.c_state)
             policy       = policy.squeeze()
             list_action  = self.env.getValidActions(state)
-            actions  = torch.tensor(list_action,dtype=torch.float32)
+            actions      = torch.tensor(list_action,dtype=torch.float32)
             categorical  = Categorical(logits=policy.masked_fill(actions==0,float('-inf')))
             action       = categorical.sample().item()
             if actions[action] != 1:
@@ -45,52 +56,40 @@ class Agent():
             # print(action)
             
             if self.env.getReward(state)==-1:
-                self.rollout.add_data(state      = torch.from_numpy(state),
-                                    h_state      = self.h_state,
-                                    c_state      = self.c_state,
-                                    action       = action,
-                                    value        = value.item(),
-                                    reward       = 0.0,
-                                    done         = 0,
-                                    valid_action = torch.from_numpy(list_action),
-                                    prob         = log_prob
-                                    )
+                if self.rollout.step_count < self.max_eps_length:
+                    self.rollout.add_data(state      = torch.from_numpy(state),
+                                        h_state      = self.h_state.squeeze(),
+                                        c_state      = self.c_state.squeeze(),
+                                        action       = action,
+                                        value        = value.item(),
+                                        reward       = 0.0,
+                                        done         = 0,
+                                        valid_action = torch.from_numpy(list_action),
+                                        prob         = log_prob
+                                        )
                 self.rollout.step_count+=1
             else:
-                self.rollout.add_data(state      = torch.from_numpy(state),
-                                    h_state      = self.h_state,
-                                    c_state      = self.c_state,
-                                    action       = action, 
-                                    value        = value.item(),
-                                    reward       = self.reward[int(self.env.getReward(state))] * 1.0,
-                                    done         = 1,
-                                    valid_action = torch.from_numpy(list_action),
-                                    prob         = log_prob
-                                    )
+                if self.rollout.step_count < self.max_eps_length:
+                    self.rollout.add_data(state      = torch.from_numpy(state),
+                                        h_state      = self.h_state.squeeze(),
+                                        c_state      = self.c_state.squeeze(),
+                                        action       = action, 
+                                        value        = value.item(),
+                                        reward       = self.reward[int(self.env.getReward(state))] * 1.0,
+                                        done         = 1,
+                                        valid_action = torch.from_numpy(list_action),
+                                        prob         = log_prob
+                                        )
+                    
+                self.rollout.batch["dones_indices"][self.rollout.game_count] = self.rollout.step_count
                 self.rollout.game_count+=1
                 self.rollout.step_count=0
-                self.h_state = None
-                self.c_state = None
+
+            self.h_state,self.c_state = h,c
+            if self.env.getReward(state)!=-1:
+                self.reset_hidden()
         
         return action,per 
-    
-    @staticmethod
-    def stable_softmax(x):
-        """
-        Overview:
-            Return the stable softmax
-
-        Arguments:
-            - x: (`Optional[torch.Tensor]`): input Logits.
-
-        Returns:
-            - softmax: (`Optional[torch.Tensor]`): stable softmax.
-        """
-        max_val           = np.max(x)
-        scaled_values     = x - max_val
-        exp_scaled_values = np.exp(scaled_values)
-        softmax           = exp_scaled_values / np.sum(exp_scaled_values)
-        return softmax
     
     def run(self,num_games:int)->float:
         """

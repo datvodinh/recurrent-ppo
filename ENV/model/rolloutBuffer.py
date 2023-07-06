@@ -5,24 +5,28 @@ import numpy as np
 
 class RolloutBuffer:
     """Save and store Agent's data"""
-    def __init__(self,seq_length,max_eps_length,num_game_per_batch,state_size,action_size) -> None:
+    def __init__(self,config,state_size,action_size) -> None:
+        self.hidden_size        = config["hidden_size"]
+        self.seq_length         = config["seq_length"]
+        self.max_eps_length     = config["max_eps_length"]
+        self.num_game_per_batch = config["num_game_per_batch"]
+        self.n_mini_batches     = config["n_mini_batch"]
+
         self.batch = {
-            "states"       : torch.zeros((num_game_per_batch,max_eps_length,state_size)),
-            "h_states"     : torch.zeros((num_game_per_batch,max_eps_length,state_size)),
-            "c_states"     : torch.zeros((num_game_per_batch,max_eps_length,state_size)),
-            "actions"      : torch.zeros((num_game_per_batch,max_eps_length)),
-            "values"       : torch.zeros((num_game_per_batch,max_eps_length)),
-            "probs"        : torch.zeros((num_game_per_batch,max_eps_length)),
-            "dones"        : torch.zeros((num_game_per_batch,max_eps_length)),
-            "action_mask"  : torch.zeros((num_game_per_batch,max_eps_length,action_size)),
-            "rewards"      : torch.zeros((num_game_per_batch,max_eps_length)),
-            "advantages"   : torch.zeros((num_game_per_batch,max_eps_length)),
-            "dones_indices": torch.zeros((num_game_per_batch,1))
+            "states"       : torch.zeros((self.num_game_per_batch,self.max_eps_length,state_size)),
+            "h_states"     : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.hidden_size)),
+            "c_states"     : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.hidden_size)),
+            "actions"      : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
+            "values"       : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
+            "probs"        : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
+            "dones"        : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
+            "action_mask"  : torch.zeros((self.num_game_per_batch,self.max_eps_length,action_size)),
+            "rewards"      : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
+            "advantages"   : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
+            "dones_indices": torch.zeros((self.num_game_per_batch))
         }
 
-        self.seq_length         = seq_length
-        self.max_eps_length     = max_eps_length
-        self.num_game_per_batch = num_game_per_batch
+        
         self.state_size         = state_size
         self.action_size        = action_size
 
@@ -31,35 +35,30 @@ class RolloutBuffer:
 
     def add_data(self,state,h_state,c_state,action,value,reward,done,valid_action,prob):
         """Add data to rollout buffer"""
-        try:
-            self.batch["states"][self.game_count][self.step_count]      = state
-            self.batch["h_states"][self.game_count][self.step_count]    = h_state
-            self.batch["c_states"][self.game_count][self.step_count]    = c_state
-            self.batch["actions"][self.game_count][self.step_count]     = action
-            self.batch["values"][self.game_count][self.step_count]      = value
-            self.batch["probs"][self.game_count][self.step_count]       = prob
-            self.batch["dones"][self.game_count][self.step_count]       = done
-            self.batch["action_mask"][self.game_count][self.step_count] = valid_action
-            self.batch["rewards"][self.game_count][self.step_count]     = reward
-            self.batch["padding"][self.game_count][self.step_count]     = 1
-        except:
-            pass
+        self.batch["states"][self.game_count][self.step_count]      = state
+        self.batch["h_states"][self.game_count][self.step_count]    = h_state
+        self.batch["c_states"][self.game_count][self.step_count]    = c_state
+        self.batch["actions"][self.game_count][self.step_count]     = action
+        self.batch["values"][self.game_count][self.step_count]      = value
+        self.batch["probs"][self.game_count][self.step_count]       = prob
+        self.batch["dones"][self.game_count][self.step_count]       = done
+        self.batch["action_mask"][self.game_count][self.step_count] = valid_action
+        self.batch["rewards"][self.game_count][self.step_count]     = reward
 
     def reset_data(self):
         """Clear all data"""
         self.batch = {
             "states"       : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.state_size)),
-            "h_states"     : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.state_size)),
-            "c_states"     : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.state_size)),
+            "h_states"     : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.hidden_size)),
+            "c_states"     : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.hidden_size)),
             "actions"      : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "values"       : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "probs"        : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "dones"        : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "action_mask"  : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.action_size)),
             "rewards"      : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
-            "padding"      : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "advantages"   : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
-            "dones_indices": torch.zeros((self.num_game_per_batch,1))
+            "dones_indices": torch.zeros((self.num_game_per_batch))
         }
         self.game_count = 0 #track current game
         self.step_count = 0 #track current time step in game
@@ -100,22 +99,22 @@ class RolloutBuffer:
         """
         sequences = []
         max_length = 1
-        for w in range(data[0]):
+        for w in range(data.shape[0]): #number of game per batch
             start_index = 0
-            for done_index in self.batch["dones_indices"][w]:
-                # Split trajectory into episodes
-                episode = data[w, start_index:done_index + 1]
-                # Split episodes into sequences
-                if self.seq_length > 0:
-                    for start in range(0, len(episode), self.seq_length):
-                        end = start + self.seq_length
-                        sequences.append(episode[start:end])
-                    max_length = self.seq_length
-                else:
-                    # If the sequence length is not set to a proper value, sequences will be based on episodes
-                    sequences.append(episode)
-                    max_length = len(episode) if len(episode) > max_length else max_length
-                start_index = done_index + 1
+            done_index = int(self.batch["dones_indices"][w])
+            # Split trajectory into episodes
+            episode = data[w, start_index:done_index + 1]
+            # Split episodes into sequences
+            if self.seq_length > 0:
+                for start in range(0, len(episode), int(self.seq_length)):
+                    end = start + int(self.seq_length)
+                    sequences.append(episode[start:end])
+                max_length = self.seq_length
+            else:
+                # If the sequence length is not set to a proper value, sequences will be based on episodes
+                sequences.append(episode)
+                max_length = len(episode) if len(episode) > max_length else max_length
+            start_index = done_index + 1
         return sequences, max_length
     
     def _pad_sequence(self, sequence:torch.Tensor, target_length:int) -> torch.Tensor:
@@ -160,9 +159,10 @@ class RolloutBuffer:
         }
         
         # Retrieve unpadded sequence indices
-        self.flat_sequence_indices = torch.asarray(self._arange_data_to_sequences(
+        self.flat_sequence_indices = self._arange_data_to_sequences(
                     torch.arange(0, self.num_game_per_batch * self.max_eps_length).reshape(
-                        (self.num_game_per_batch, self.max_eps_length)))[0], dtype=object)
+                        (self.num_game_per_batch, self.max_eps_length)))[0]
+        self.flat_sequence_indices = np.array(self.flat_sequence_indices,dtype=object)
         
         for key, value in samples.items():
             sequences, max_sequence_length = self._arange_data_to_sequences(value)
@@ -176,9 +176,10 @@ class RolloutBuffer:
         self.actual_sequence_length = max_sequence_length
         
         # Add remaining data samples
-        samples["values"]     = self.values
-        samples["probs"]      = self.log_probs
-        samples["advantages"] = self.advantages
+        samples["values"]     = self.batch["values"]
+        samples["probs"]      = self.batch["probs"]
+        samples["advantages"] = self.batch["advantages"]
+        samples["action_mask"] = self.batch["action_mask"]
 
         self.samples = {}
         for key, value in samples.items():
@@ -219,13 +220,13 @@ class RolloutBuffer:
             for key, value in self.samples.items():
                 if key == "h_states" or key == "c_states":
                     # Select recurrent cell states of sequence starts
-                    mini_batch[key] = value[sequence_indices[start:end]].to(self.device)
+                    mini_batch[key] = value[sequence_indices[start:end]]
                 elif key == "probs" or "advantages" in key or key == "values":
                     # Select unpadded data
-                    mini_batch[key] = value[mini_batch_unpadded_indices].to(self.device)
+                    mini_batch[key] = value[mini_batch_unpadded_indices]
                 else:
                     # Select padded data
-                    mini_batch[key] = value[mini_batch_padded_indices].to(self.device)
+                    mini_batch[key] = value[mini_batch_padded_indices]
             start = end
             yield mini_batch
 
