@@ -153,25 +153,24 @@ class RolloutBuffer:
         samples = {
             "states": self.batch["states"],
             "actions": self.batch["actions"],
+            "action_mask": self.batch["action_mask"],
             "loss_mask": torch.ones((self.num_game_per_batch, self.max_eps_length), dtype=torch.bool), # The loss mask is used for masking the padding while computing the loss function.
             "h_states": self.batch["h_states"],
             "c_states": self.batch["c_states"],
         }
-        
         # Retrieve unpadded sequence indices
         self.flat_sequence_indices = self._arange_data_to_sequences(
                     torch.arange(0, self.num_game_per_batch * self.max_eps_length).reshape(
                         (self.num_game_per_batch, self.max_eps_length)))[0]
-        self.flat_sequence_indices = np.array(self.flat_sequence_indices,dtype=object)
-        
+        self.flat_sequence_indices = np.array([t.numpy() for t in self.flat_sequence_indices],dtype=object)
+
         for key, value in samples.items():
             sequences, max_sequence_length = self._arange_data_to_sequences(value)
             for i, sequence in enumerate(sequences):
                 sequences[i] = self._pad_sequence(sequence, max_sequence_length)
-            samples[key] = torch.stack(sequences, axis=0) # (target shape: (Sequence, Step, Data ...)
+            samples[key] = torch.stack(sequences, axis=0) # (target shape: (Sequence, Step, Data ...))
             if (key == "h_states" or key == "c_states"):
                 samples[key] = samples[key][:, 0] # Select the very first recurrent cell state of a sequence and add it to the samples
-
         self.num_sequences = len(sequences)
         self.actual_sequence_length = max_sequence_length
         
@@ -179,7 +178,6 @@ class RolloutBuffer:
         samples["values"]     = self.batch["values"]
         samples["probs"]      = self.batch["probs"]
         samples["advantages"] = self.batch["advantages"]
-        samples["action_mask"] = self.batch["action_mask"]
 
         self.samples = {}
         for key, value in samples.items():
@@ -199,13 +197,11 @@ class RolloutBuffer:
         num_sequences_per_batch = self.num_sequences // self.n_mini_batches
         num_sequences_per_batch = [num_sequences_per_batch] * self.n_mini_batches # Arrange a list that determines the sequence count for each mini batch
         remainder               = self.num_sequences % self.n_mini_batches
-
         for i in range(remainder):
             num_sequences_per_batch[i] += 1 # Add the remainder if the sequence count and the number of mini batches do not share a common divider
         # Prepare indices, but only shuffle the sequence indices and not the entire batch to ensure that sequences are maintained as a whole.
         indices          = torch.arange(0, self.num_sequences * self.actual_sequence_length).reshape(self.num_sequences, self.actual_sequence_length)
         sequence_indices = torch.randperm(self.num_sequences)
-
         # Compose mini batches
         start = 0
         for num_sequences in num_sequences_per_batch:
@@ -217,6 +213,7 @@ class RolloutBuffer:
             mini_batch_unpadded_indices = [item for sublist in mini_batch_unpadded_indices for item in sublist]
             mini_batch                  = {}
 
+
             for key, value in self.samples.items():
                 if key == "h_states" or key == "c_states":
                     # Select recurrent cell states of sequence starts
@@ -227,6 +224,7 @@ class RolloutBuffer:
                 else:
                     # Select padded data
                     mini_batch[key] = value[mini_batch_padded_indices]
+
             start = end
             yield mini_batch
 

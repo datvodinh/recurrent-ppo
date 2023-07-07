@@ -42,7 +42,8 @@ class Trainer:
         
         """
         #Calculate returns and advantage
-        returns               = value + advantage
+        
+        returns         = value + advantage
         ratios          = torch.exp(torch.clamp(log_prob_new-log_prob.detach(),min=-20.,max=5.))
         Kl              = kl_divergence(Categorical(logits=log_prob), Categorical(logits=log_prob_new))
 
@@ -79,12 +80,11 @@ class Trainer:
             self.model.train()
             
             for _ in range(self.config["num_epochs"]):
-                mini_batch_loader   = self.agent.rollout.mini_batch_generator(self.config)
-                for mini_batch in mini_batch_loader:
+                mini_batch_generator   = self.agent.rollout.mini_batch_generator(self.config)
+                for mini_batch in mini_batch_generator:
                     B,S = mini_batch["states"].shape
                     mini_batch["states"] = mini_batch["states"].view(B // self.config["seq_length"],self.config["seq_length"],S)
                     pol_new,val_new,_,_ = self.model(mini_batch["states"],mini_batch["h_states"].unsqueeze(0),mini_batch["c_states"].unsqueeze(0))
-        
                     val_new         = val_new.squeeze(1)
                     categorical_new = Categorical(logits=pol_new.masked_fill(mini_batch["action_mask"]==0,float('-1e20')))
                     log_prob_new    = categorical_new.log_prob(mini_batch["actions"].view(1,-1)).squeeze(0)

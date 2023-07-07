@@ -47,8 +47,8 @@ class LSTMPPOModel(nn.Module):
 
         Arguments:
             - state: (`torch.Tensor`): shape (batch_size, len_seq, state_len)
-            - hidden_state: (`torch.Tensor`): shape (batch_size, len_seq, state_len)
-            - candidate_state: (`torch.Tensor`):shape (batch_size, len_seq, state_len)
+            - hidden_state: (`torch.Tensor`): shape (batch_size, len_seq, hidden_len)
+            - candidate_state: (`torch.Tensor`):shape (batch_size, len_seq, hidden_len)
 
         Return:
             - policy: (torch.Tensor): policy with shape (batch_size,num_action)
