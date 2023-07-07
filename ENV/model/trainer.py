@@ -44,6 +44,9 @@ class Trainer:
         #Calculate returns and advantage
         
         returns         = value + advantage
+
+        if self.config["normlize_advantage"]:
+            advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
         ratios          = torch.exp(torch.clamp(log_prob_new-log_prob.detach(),min=-20.,max=5.))
         Kl              = kl_divergence(Categorical(logits=log_prob), Categorical(logits=log_prob_new))
 

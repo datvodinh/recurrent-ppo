@@ -59,7 +59,7 @@ class Agent():
                                         c_state      = self.c_state.squeeze(),
                                         action       = action,
                                         value        = value.item(),
-                                        reward       = 0.0,
+                                        reward       = self.reward[int(self.env.getReward(state))] * 1.0,
                                         done         = 0,
                                         valid_action = torch.from_numpy(list_action),
                                         prob         = log_prob
