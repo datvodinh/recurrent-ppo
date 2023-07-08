@@ -6,7 +6,11 @@ import numpy as np
 class LSTMPPOModel(nn.Module):
     def __init__(self,config,state_size,action_size):
         super().__init__()
-        self.lstm= nn.LSTM(state_size,config["hidden_size"],batch_first=True)
+        self.encoder = nn.Sequential(
+            self._layer_init(nn.Linear(state_size,config["embed_size"])),
+            nn.Tanh()
+            )
+        self.lstm= nn.LSTM(config["embed_size"],config["hidden_size"],batch_first=True)
 
         self.fc_pol   = nn.Sequential(
             nn.Tanh(),
@@ -55,7 +59,8 @@ class LSTMPPOModel(nn.Module):
             - value: (torch.Tensor): value with shape (batch_size,1)
             - h: 
         """
-        out, (h,c) = self.lstm(state,(hidden_state,candidate_state))
+        out        = self.encoder(state)
+        out, (h,c) = self.lstm(out,(hidden_state,candidate_state))
         out        = out.reshape(out.size(0) * out.size(1),out.size(2))
         policy     = self.fc_pol(out)
         value      = self.fc_val(out)
