@@ -25,6 +25,7 @@ class Agent():
         self.h_state            = torch.zeros(1,1,self.hidden_size)
         self.c_state            = torch.zeros(1,1,self.hidden_size)
 
+    @torch.no_grad()
     def play(self,state,per):
         """
         Overview:
@@ -39,52 +40,51 @@ class Agent():
             - per: (`List`): per file
         """
         self.model.eval()
-        with torch.no_grad():
-            tensor_state = torch.tensor(state.reshape(1,1,-1),dtype=torch.float32)
-            policy,value,h,c = self.model(tensor_state,self.h_state,self.c_state)
-            policy       = policy.squeeze()
-            list_action  = self.env.getValidActions(state)
-            actions      = torch.tensor(list_action,dtype=torch.float32)
-            categorical  = Categorical(logits=policy.masked_fill(actions==0,float('-1e20')))
-            action       = categorical.sample().item()
-            if actions[action] != 1:
-                action   = np.random.choice(np.where(list_action==1)[0])
+        tensor_state = torch.tensor(state.reshape(1,1,-1),dtype=torch.float32)
+        policy,value,h,c = self.model(tensor_state,self.h_state,self.c_state)
+        policy       = policy.squeeze()
+        list_action  = self.env.getValidActions(state)
+        actions      = torch.tensor(list_action,dtype=torch.float32)
+        categorical  = Categorical(logits=policy.masked_fill(actions==0,float('-1e20')))
+        action       = categorical.sample().item()
+        if actions[action] != 1:
+            action   = np.random.choice(np.where(list_action==1)[0])
 
-            log_prob     = categorical.log_prob(torch.tensor([action]).view(1,-1)).squeeze()
-            
-            if self.env.getReward(state)==-1:
-                if self.rollout.step_count < self.max_eps_length:
-                    self.rollout.add_data(state      = torch.from_numpy(state),
-                                        h_state      = self.h_state.squeeze(),
-                                        c_state      = self.c_state.squeeze(),
-                                        action       = action,
-                                        value        = value.item(),
-                                        reward       = self.reward[int(self.env.getReward(state))] * 1.0,
-                                        done         = 0,
-                                        valid_action = torch.from_numpy(list_action),
-                                        prob         = log_prob
-                                        )
-                self.rollout.step_count+=1
-            else:
-                if self.rollout.step_count < self.max_eps_length:
-                    self.rollout.add_data(state      = torch.from_numpy(state),
-                                        h_state      = self.h_state.squeeze(),
-                                        c_state      = self.c_state.squeeze(),
-                                        action       = action, 
-                                        value        = value.item(),
-                                        reward       = self.reward[int(self.env.getReward(state))] * 1.0,
-                                        done         = 1,
-                                        valid_action = torch.from_numpy(list_action),
-                                        prob         = log_prob
-                                        )
-                    
-                self.rollout.batch["dones_indices"][self.rollout.game_count] = self.rollout.step_count
-                self.rollout.game_count+=1
-                self.rollout.step_count=0
+        log_prob     = categorical.log_prob(torch.tensor([action]).view(1,-1)).squeeze()
+        
+        if self.env.getReward(state)==-1:
+            if self.rollout.step_count < self.max_eps_length:
+                self.rollout.add_data(state      = torch.from_numpy(state),
+                                    h_state      = self.h_state.squeeze(),
+                                    c_state      = self.c_state.squeeze(),
+                                    action       = action,
+                                    value        = value.item(),
+                                    reward       = self.reward[int(self.env.getReward(state))] * 1.0,
+                                    done         = 0,
+                                    valid_action = torch.from_numpy(list_action),
+                                    prob         = log_prob
+                                    )
+            self.rollout.step_count+=1
+        else:
+            if self.rollout.step_count < self.max_eps_length:
+                self.rollout.add_data(state      = torch.from_numpy(state),
+                                    h_state      = self.h_state.squeeze(),
+                                    c_state      = self.c_state.squeeze(),
+                                    action       = action, 
+                                    value        = value.item(),
+                                    reward       = self.reward[int(self.env.getReward(state))] * 1.0,
+                                    done         = 1,
+                                    valid_action = torch.from_numpy(list_action),
+                                    prob         = log_prob
+                                    )
+                
+            self.rollout.batch["dones_indices"][self.rollout.game_count] = self.rollout.step_count
+            self.rollout.game_count+=1
+            self.rollout.step_count=0
 
-            self.h_state,self.c_state = h,c
-            if self.env.getReward(state)!=-1:
-                self.reset_hidden()
+        self.h_state,self.c_state = h,c
+        if self.env.getReward(state)!=-1:
+            self.reset_hidden()
         
         return action,per 
     

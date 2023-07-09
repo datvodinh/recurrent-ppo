@@ -5,6 +5,9 @@ import numpy as np
 import time
 import os
 
+torch.manual_seed(9999)
+np.random.seed(9999)
+
 from model.model import LSTMPPOModel
 from model.agent import Agent
 from model.writer import Writer
@@ -64,7 +67,7 @@ class Trainer:
         
         total_loss            = actor_loss + self.config["critic_coef"] * critic_loss - self.config["entropy_coef"] * entropy
 
-        return actor_loss, critic_loss, total_loss, entropy.mean()
+        return actor_loss, critic_loss, total_loss, entropy.mean(),Kl
     
 
     
@@ -97,7 +100,7 @@ class Trainer:
                     val_new = val_new[mini_batch["loss_mask"]]
                     entropy = entropy[mini_batch["loss_mask"]]
 
-                    actor_loss, critic_loss, total_loss,entropy = self._cal_loss(
+                    actor_loss, critic_loss, total_loss,entropy,Kl = self._cal_loss(
                         value        = mini_batch["values"].reshape(-1).detach(),
                         value_new    = val_new,
                         entropy      = entropy,
@@ -121,7 +124,8 @@ class Trainer:
                                 entropy     = entropy,
                                 actor_loss  = actor_loss,
                                 critic_loss = critic_loss,
-                                total_loss  = total_loss
+                                total_loss  = total_loss,
+                                kl          = Kl.item()
                             )
                             step+=1
             
