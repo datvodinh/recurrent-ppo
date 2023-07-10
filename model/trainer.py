@@ -11,6 +11,7 @@ np.random.seed(9999)
 from model.model import LSTMPPOModel
 from model.agent import Agent
 from model.writer import Writer
+from model.distribution import Distribution
 
 class Trainer:
     """Train the model"""
@@ -23,8 +24,9 @@ class Trainer:
         if writer_path is not None:
             self.writer    = Writer(writer_path)
         self.agent         = Agent(self.env,self.model,config)
+        self.distribution  = Distribution()
     
-    def _cal_loss(self,value,value_new,entropy,log_prob,log_prob_new,advantage):
+    def _cal_loss(self,value,value_new,entropy,log_prob,log_prob_new,Kl,advantage):
         """
         Overview:
             Calculate Total Loss
@@ -51,7 +53,6 @@ class Trainer:
         if self.config["normalize_advantage"]:
             advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
         ratios          = torch.exp(torch.clamp(log_prob_new-log_prob.detach(),min=-20.,max=5.))
-        Kl              = kl_divergence(Categorical(logits=log_prob), Categorical(logits=log_prob_new))
 
         R_dot_A = ratios * advantage
         actor_loss      = -torch.where(
@@ -67,7 +68,7 @@ class Trainer:
         
         total_loss            = actor_loss + self.config["critic_coef"] * critic_loss - self.config["entropy_coef"] * entropy
 
-        return actor_loss, critic_loss, total_loss, entropy.mean(),Kl
+        return actor_loss, critic_loss, total_loss, entropy
     
 
     
@@ -92,20 +93,23 @@ class Trainer:
                     mini_batch["states"] = mini_batch["states"].view(B // self.config["seq_length"],self.config["seq_length"],S)
                     pol_new,val_new,_,_ = self.model(mini_batch["states"],mini_batch["h_states"].unsqueeze(0),mini_batch["c_states"].unsqueeze(0))
                     val_new         = val_new.squeeze(1)
-                    categorical_new = Categorical(logits=pol_new.masked_fill(mini_batch["action_mask"]==0,float('-1e20')))
-                    log_prob_new    = categorical_new.log_prob(mini_batch["actions"].view(1,-1)).squeeze(0)
-                    entropy         = categorical_new.entropy()
 
-                    log_prob_new = log_prob_new[mini_batch["loss_mask"]]
+                    log_prob_new,entropy = self.distribution.log_prob(pol_new,mini_batch["actions"].view(1,-1),mini_batch["action_mask"])
+
+                    log_prob_new = log_prob_new.squeeze(0)[mini_batch["loss_mask"]]
                     val_new = val_new[mini_batch["loss_mask"]]
                     entropy = entropy[mini_batch["loss_mask"]]
 
-                    actor_loss, critic_loss, total_loss,entropy,Kl = self._cal_loss(
+                    Kl = self.distribution.kl_divergence(mini_batch["policy"],pol_new)
+                    Kl = Kl[mini_batch["loss_mask"]]
+
+                    actor_loss, critic_loss, total_loss, entropy = self._cal_loss(
                         value        = mini_batch["values"].reshape(-1).detach(),
                         value_new    = val_new,
                         entropy      = entropy,
                         log_prob     = mini_batch["probs"].reshape(-1).detach(),
                         log_prob_new = log_prob_new,
+                        Kl           = Kl,
                         advantage    = mini_batch["advantages"].reshape(-1).detach(),
                     )
                     with torch.autograd.set_detect_anomaly(self.config["set_detect_anomaly"]):
@@ -125,7 +129,9 @@ class Trainer:
                                 actor_loss  = actor_loss,
                                 critic_loss = critic_loss,
                                 total_loss  = total_loss,
-                                kl          = Kl.item()
+                                kl_mean     = Kl.mean().item(),
+                                kl_max      = Kl.max.item(),
+                                kl_min      = Kl.min.item()
                             )
                             step+=1
             

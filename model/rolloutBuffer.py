@@ -18,6 +18,7 @@ class RolloutBuffer:
             "c_states"     : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.hidden_size)),
             "actions"      : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "values"       : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
+            "policy"       : torch.zeros((self.num_game_per_batch,self.max_eps_length,action_size)),
             "probs"        : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "dones"        : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "action_mask"  : torch.zeros((self.num_game_per_batch,self.max_eps_length,action_size)),
@@ -33,13 +34,14 @@ class RolloutBuffer:
         self.game_count         = 0 #track current game
         self.step_count         = 0 #track current time step in game
 
-    def add_data(self,state,h_state,c_state,action,value,reward,done,valid_action,prob):
+    def add_data(self,state,h_state,c_state,action,value,reward,done,valid_action,prob,policy):
         """Add data to rollout buffer"""
         self.batch["states"][self.game_count][self.step_count]      = state
         self.batch["h_states"][self.game_count][self.step_count]    = h_state
         self.batch["c_states"][self.game_count][self.step_count]    = c_state
         self.batch["actions"][self.game_count][self.step_count]     = action
         self.batch["values"][self.game_count][self.step_count]      = value
+        self.batch["policy"][self.game_count][self.step_count]      = policy
         self.batch["probs"][self.game_count][self.step_count]       = prob
         self.batch["dones"][self.game_count][self.step_count]       = done
         self.batch["action_mask"][self.game_count][self.step_count] = valid_action
@@ -53,6 +55,7 @@ class RolloutBuffer:
             "c_states"     : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.hidden_size)),
             "actions"      : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "values"       : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
+            "policy"       : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.action_size)),
             "probs"        : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "dones"        : torch.zeros((self.num_game_per_batch,self.max_eps_length)),
             "action_mask"  : torch.zeros((self.num_game_per_batch,self.max_eps_length,self.action_size)),
@@ -88,14 +91,16 @@ class RolloutBuffer:
             last_value                    = self.batch["values"][:,t]
 
     def _arange_data_to_sequences(self, data):
-        """Splits the povided data into episodes and then into sequences.
-        The split points are indicated by the envrinoments' done signals.
+        """
+        Overview:
+            Splits the povided data into episodes and then into sequences.
+            The split points are indicated by the envrinoments' done signals.
         
         Arguments:
-            data {torch.tensor} -- The to be split data arrange into num_worker, max_eps_length
+            data {`torch.tensor`} -- The to be split data arrange into num_worker, max_eps_length
             
         Returns:
-            {list} -- Data arranged into sequences of variable length as list
+            {`list`} -- Data arranged into sequences of variable length as list
         """
         sequences = []
         max_length = 1
@@ -151,12 +156,13 @@ class RolloutBuffer:
         """
         # Supply training samples
         samples = {
-            "states": self.batch["states"],
-            "actions": self.batch["actions"],
-            "action_mask": self.batch["action_mask"],
-            "loss_mask": torch.ones((self.num_game_per_batch, self.max_eps_length), dtype=torch.bool), # The loss mask is used for masking the padding while computing the loss function.
-            "h_states": self.batch["h_states"],
-            "c_states": self.batch["c_states"],
+            "states"      : self.batch["states"],
+            "actions"     : self.batch["actions"],
+            "policy"      : self.batch["policy"],
+            "action_mask" : self.batch["action_mask"],
+            "loss_mask"   : torch.ones((self.num_game_per_batch, self.max_eps_length), dtype=torch.bool), # The loss mask is used for masking the padding while computing the loss function.
+            "h_states"    : self.batch["h_states"],
+            "c_states"    : self.batch["c_states"],
         }
         # Retrieve unpadded sequence indices
         self.flat_sequence_indices = self._arange_data_to_sequences(

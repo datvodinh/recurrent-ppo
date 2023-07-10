@@ -3,7 +3,7 @@ import torch.nn.functional as F
 import numpy as np
 from numba import njit
 from model.rolloutBuffer import RolloutBuffer
-from torch.distributions import Categorical
+from model.distribution import Distribution
 class Agent():
     """Agent"""
     def __init__(self,env,model,config):
@@ -12,10 +12,11 @@ class Agent():
         self.model              = model
         self.reward             = config["rewards"]
         self.max_eps_length     = config["max_eps_length"]
-        self.rollout            = RolloutBuffer(config,env.getStateSize(),env.getActionSize())
         self.h_state            = torch.zeros(1,1,config["hidden_size"])
         self.c_state            = torch.zeros(1,1,config["hidden_size"])
         self.hidden_size        = config["hidden_size"]
+        self.rollout            = RolloutBuffer(config,env.getStateSize(),env.getActionSize())
+        self.distribution       = Distribution()
 
     def reset_hidden(self):
         """
@@ -44,13 +45,10 @@ class Agent():
         policy,value,h,c = self.model(tensor_state,self.h_state,self.c_state)
         policy       = policy.squeeze()
         list_action  = self.env.getValidActions(state)
-        actions      = torch.tensor(list_action,dtype=torch.float32)
-        categorical  = Categorical(logits=policy.masked_fill(actions==0,float('-1e20')))
-        action       = categorical.sample().item()
-        if actions[action] != 1:
+        action_mask      = torch.tensor(list_action,dtype=torch.float32)
+        action,log_prob = self.distribution.sample_action(policy,action_mask)
+        if action_mask[action] != 1:
             action   = np.random.choice(np.where(list_action==1)[0])
-
-        log_prob     = categorical.log_prob(torch.tensor([action]).view(1,-1)).squeeze()
         
         if self.env.getReward(state)==-1:
             if self.rollout.step_count < self.max_eps_length:
@@ -62,7 +60,8 @@ class Agent():
                                     reward       = self.reward[int(self.env.getReward(state))] * 1.0,
                                     done         = 0,
                                     valid_action = torch.from_numpy(list_action),
-                                    prob         = log_prob
+                                    prob         = log_prob,
+                                    policy       =policy
                                     )
             self.rollout.step_count+=1
         else:
@@ -75,7 +74,8 @@ class Agent():
                                     reward       = self.reward[int(self.env.getReward(state))] * 1.0,
                                     done         = 1,
                                     valid_action = torch.from_numpy(list_action),
-                                    prob         = log_prob
+                                    prob         = log_prob,
+                                    policy       = policy
                                     )
                 
             self.rollout.batch["dones_indices"][self.rollout.game_count] = self.rollout.step_count
