@@ -130,8 +130,8 @@ class Trainer:
                                 critic_loss = critic_loss,
                                 total_loss  = total_loss,
                                 kl_mean     = Kl.mean().item(),
-                                kl_max      = Kl.max.item(),
-                                kl_min      = Kl.min.item()
+                                kl_max      = Kl.max().item(),
+                                kl_min      = Kl.min().item()
                             )
                             step+=1
             
