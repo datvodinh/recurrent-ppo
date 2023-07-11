@@ -59,16 +59,16 @@ class Trainer:
                             (Kl >= self.config["policy_kl_range"]) & (R_dot_A > advantage),
                             R_dot_A - self.config["policy_params"] * Kl,
                             R_dot_A - self.config["policy_kl_range"]
-                        ).mean()
+                        )
 
         value_clipped         = value + torch.clamp(value_new - value, -self.config["value_clip"], self.config["value_clip"])
-        critic_loss           = 0.5 * torch.max((returns-value_new)**2,(returns-value_clipped)**2).mean()
+        critic_loss           = 0.5 * torch.max((returns-value_new)**2,(returns-value_clipped)**2)
 
-        entropy               = entropy.mean()
+        entropy               = entropy
         
         total_loss            = actor_loss + self.config["critic_coef"] * critic_loss - self.config["entropy_coef"] * entropy
 
-        return actor_loss, critic_loss, total_loss, entropy
+        return actor_loss.mean(), critic_loss.mean(), total_loss.mean(), entropy.mean()
     
 
     
