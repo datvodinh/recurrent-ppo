@@ -58,7 +58,7 @@ class Trainer:
         actor_loss      = -torch.where(
                             (Kl >= self.config["policy_kl_range"]) & (R_dot_A > advantage),
                             R_dot_A - self.config["policy_params"] * Kl,
-                            R_dot_A
+                            R_dot_A - self.config["policy_kl_range"]
                         ).mean()
 
         value_clipped         = value + torch.clamp(value_new - value, -self.config["value_clip"], self.config["value_clip"])
