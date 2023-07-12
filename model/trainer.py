@@ -26,7 +26,7 @@ class Trainer:
         self.agent         = Agent(self.env,self.model,config)
         self.distribution  = Distribution()
     
-    def _cal_loss(self,value,value_new,entropy,log_prob,log_prob_new,Kl,advantage):
+    def _truly_loss(self,value,value_new,entropy,log_prob,log_prob_new,Kl,advantage):
         """
         Overview:
             Calculate Total Loss
@@ -51,7 +51,7 @@ class Trainer:
         returns         = value + advantage
 
         if self.config["normalize_advantage"]:
-            advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
+            advantage   = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
         ratios          = torch.exp(torch.clamp(log_prob_new-log_prob.detach(),min=-20.,max=5.))
 
         R_dot_A = ratios * advantage
@@ -63,15 +63,29 @@ class Trainer:
 
         value_clipped         = value + torch.clamp(value_new - value, -self.config["value_clip"], self.config["value_clip"])
         critic_loss           = 0.5 * torch.max((returns-value_new)**2,(returns-value_clipped)**2)
-
-        entropy               = entropy
-        
+  
         total_loss            = actor_loss + self.config["critic_coef"] * critic_loss - self.config["entropy_coef"] * entropy
 
         return actor_loss.mean(), critic_loss.mean(), total_loss.mean(), entropy.mean()
     
+    def _normal_loss(self,value,value_new,entropy,log_prob,log_prob_new,advantage):
 
+        returns         = value + advantage
+
+        if self.config["normalize_advantage"]:
+            advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
+
+        ratios                = torch.exp(torch.clamp(log_prob_new-log_prob.detach(),min=-20.,max=5.))
+        weighted_prob         = ratios * advantage
+        weighted_clipped_prob = torch.clamp(ratios,1-0.2,1+0.2) * advantage
+        actor_loss            = -torch.min(weighted_prob,weighted_clipped_prob)
+
+        value_clipped         = value + torch.clamp(value_new - value, -self.config["value_clip"], self.config["value_clip"])
+        critic_loss           = 0.5 * torch.max((returns-value_new)**2,(returns-value_clipped)**2)
+
+        total_loss            = actor_loss + self.config["critic_coef"] * critic_loss - self.config["entropy_coef"] * entropy
     
+        return actor_loss.mean(), critic_loss.mean(), total_loss.mean(), entropy.mean()
 
 
     def train(self,write_data=True):
@@ -102,16 +116,26 @@ class Trainer:
 
                     Kl = self.distribution.kl_divergence(mini_batch["policy"],pol_new)
                     Kl = Kl[mini_batch["loss_mask"]]
+                    if self.config["loss_type"]=="TrulyPPO":
+                        actor_loss, critic_loss, total_loss, entropy = self._truly_loss(
+                            value        = mini_batch["values"].reshape(-1).detach(),
+                            value_new    = val_new,
+                            entropy      = entropy,
+                            log_prob     = mini_batch["probs"].reshape(-1).detach(),
+                            log_prob_new = log_prob_new,
+                            Kl           = Kl,
+                            advantage    = mini_batch["advantages"].reshape(-1).detach(),
+                        )
+                    elif self.config["loss_type"]=="PPO":
+                        actor_loss, critic_loss, total_loss, entropy = self._normal_loss(
+                            value        = mini_batch["values"].reshape(-1).detach(),
+                            value_new    = val_new,
+                            entropy      = entropy,
+                            log_prob     = mini_batch["probs"].reshape(-1).detach(),
+                            log_prob_new = log_prob_new,
+                            advantage    = mini_batch["advantages"].reshape(-1).detach(),
+                        )
 
-                    actor_loss, critic_loss, total_loss, entropy = self._cal_loss(
-                        value        = mini_batch["values"].reshape(-1).detach(),
-                        value_new    = val_new,
-                        entropy      = entropy,
-                        log_prob     = mini_batch["probs"].reshape(-1).detach(),
-                        log_prob_new = log_prob_new,
-                        Kl           = Kl,
-                        advantage    = mini_batch["advantages"].reshape(-1).detach(),
-                    )
                     with torch.autograd.set_detect_anomaly(self.config["set_detect_anomaly"]):
                         if not torch.isnan(total_loss).any():
                             self.optimizer.zero_grad()
