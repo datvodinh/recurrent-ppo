@@ -4,7 +4,17 @@ import torch.nn.functional as F
 import numpy as np
 
 class LSTMPPOModel(nn.Module):
-    def __init__(self,config,state_size,action_size):
+    """LSTM PPO Model class for the policy and value networks"""
+    def __init__(self, config, state_size, action_size):
+        """
+        Overview:
+            Initializes the LSTMPPOModel instance.
+
+        Arguments:
+            - config: (`dict`): Configuration settings for the model.
+            - state_size: (`int`): The size of the input state.
+            - action_size: (`int`): The size of the action space.
+        """
         super().__init__()
         self.encoder = nn.Sequential(
             self._layer_init(nn.Linear(state_size,config["embed_size"])),
