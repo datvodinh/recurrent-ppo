@@ -29,14 +29,7 @@ class Trainer:
         self.env = env
 
         self.model = LSTMPPOModel(config, self.env.getStateSize(), self.env.getActionSize())
-        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=config['lr']['start'])
-        for param_group in self.optimizer.param_groups:
-            param_group['initial_lr'] = config['lr']['start']
-        
-        self.lr_schedule = torch.optim.lr_scheduler.StepLR(optimizer=self.optimizer,
-                                                           step_size=1,
-                                                           gamma=(config['lr']["start"] - config['lr']['end']) / config['lr']['step'],
-                                                           last_epoch=config['lr']['step'])
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=config['lr'])
         
         self.entropy_coef = config["entropy_coef"]["start"]
         self.entropy_coef_step = (config['entropy_coef']["start"] - config['entropy_coef']['end']) / config['entropy_coef']['step']
@@ -144,7 +137,6 @@ class Trainer:
                             total_loss.backward()
                             nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=self.config["max_grad_norm"])
                             self.optimizer.step()
-                            self.lr_schedule.step()
                             self._entropy_coef_schedule()
 
                     if write_data:
