@@ -16,24 +16,30 @@ class LSTMPPOModel(nn.Module):
             - action_size: (`int`): The size of the action space.
         """
         super().__init__()
-        self.encoder = nn.Sequential(
-            self._layer_init(nn.Linear(state_size,config["embed_size"])),
-            nn.Tanh()
-            )
-        self.lstm= nn.LSTM(config["embed_size"],config["hidden_size"],batch_first=True)
+
+        self.config = config
+
+        if config["encode_state"]:
+            self.encoder = nn.Sequential(
+                self._layer_init(nn.Linear(state_size,config["LSTM"]["embed_size"])),
+                nn.Tanh()
+                )
+            self.lstm= nn.LSTM(config["LSTM"]["embed_size"],config["LSTM"]["hidden_size"],batch_first=True)
+        else:
+            self.lstm= nn.LSTM(state_size,config["LSTM"]["hidden_size"],batch_first=True)
 
         self.fc_pol   = nn.Sequential(
             nn.Tanh(),
-            self._layer_init(nn.Linear(config["hidden_size"],config["hidden_size"])),
+            self._layer_init(nn.Linear(config["LSTM"]["hidden_size"],config["LSTM"]["hidden_size"])),
             nn.Tanh(),
-            self._layer_init(nn.Linear(config["hidden_size"],action_size),std=0.01),
+            self._layer_init(nn.Linear(config["LSTM"]["hidden_size"],action_size),std=0.01),
         )
 
         self.fc_val   = nn.Sequential(
             nn.Tanh(),
-            self._layer_init(nn.Linear(config["hidden_size"],config["hidden_size"])),
+            self._layer_init(nn.Linear(config["LSTM"]["hidden_size"],config["LSTM"]["hidden_size"])),
             nn.Tanh(),
-            self._layer_init(nn.Linear(config["hidden_size"],1),std=1),
+            self._layer_init(nn.Linear(config["LSTM"]["hidden_size"],1),std=1),
         )
 
     @staticmethod
@@ -69,8 +75,12 @@ class LSTMPPOModel(nn.Module):
             - value: (torch.Tensor): value with shape (batch_size,1)
             - h: 
         """
-        out        = self.encoder(state)
-        out, (h,c) = self.lstm(out,(hidden_state,candidate_state))
+
+        if self.config["encode_state"]:
+            out, (h,c) = self.lstm(self.encoder(state),(hidden_state,candidate_state))
+        else:
+            out, (h,c) = self.lstm(state,(hidden_state,candidate_state))
+
         out        = out.reshape(out.size(0) * out.size(1),out.size(2))
         policy     = self.fc_pol(out)
         value      = self.fc_val(out)

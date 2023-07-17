@@ -6,9 +6,9 @@ import numpy as np
 class RolloutBuffer:
     """Save and store Agent's data"""
     def __init__(self,config,state_size,action_size) -> None:
-        self.hidden_size        = config["hidden_size"]
-        self.seq_length         = config["seq_length"]
-        self.max_eps_length     = config["max_eps_length"]
+        self.hidden_size        = config["LSTM"]["hidden_size"]
+        self.seq_length         = config["LSTM"]["seq_length"]
+        self.max_eps_length     = config["LSTM"]["max_eps_length"]
         self.num_game_per_batch = config["num_game_per_batch"]
         self.n_mini_batches     = config["n_mini_batch"]
 
@@ -190,7 +190,7 @@ class RolloutBuffer:
             if not key == "h_states" and not key == "c_states":
                 value = value.reshape(value.shape[0] * value.shape[1], *value.shape[2:])
             self.samples[key] = value
-    def mini_batch_generator(self,config):
+    def mini_batch_generator(self):
         """
         Overview:
             A recurrent generator that returns a dictionary containing the data of a whole minibatch.

@@ -21,10 +21,10 @@ class Agent():
         self.env            = env
         self.model          = model
         self.reward         = config["rewards"]
-        self.max_eps_length = config["max_eps_length"]
-        self.h_state        = torch.zeros(1, 1, config["hidden_size"])
-        self.c_state        = torch.zeros(1, 1, config["hidden_size"])
-        self.hidden_size    = config["hidden_size"]
+        self.max_eps_length = config["LSTM"]["max_eps_length"]
+        self.h_state        = torch.zeros(1, 1, config["LSTM"]["hidden_size"])
+        self.c_state        = torch.zeros(1, 1, config["LSTM"]["hidden_size"])
+        self.hidden_size    = config["LSTM"]["hidden_size"]
         self.rollout        = RolloutBuffer(config, env.getStateSize(), env.getActionSize())
         self.distribution   = Distribution()
 
