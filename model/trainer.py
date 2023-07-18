@@ -166,11 +166,11 @@ class Trainer:
                                 kl_max      = Kl.max().item(),
                                 kl_min      = Kl.min().item()
                             )
-
+                            
                             self._save_log()
                         
-                 
-            self._save_model()
+            if (self.data["step"]%200)==0:
+                self._save_model()
             self.agent.rollout.reset_data()
 
     def _save_model(self):
