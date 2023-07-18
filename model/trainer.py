@@ -2,8 +2,7 @@ from torch.distributions import Categorical, kl_divergence
 import torch
 import torch.nn as nn
 import numpy as np
-import time
-import os
+import json
 
 torch.manual_seed(9999)
 np.random.seed(9999)
@@ -15,7 +14,7 @@ from model.distribution import Distribution
 
 class Trainer:
     """Trainer class for training the model"""
-    def __init__(self, config, env, writer_path=None):
+    def __init__(self, config, env, writer_path=None,save_path=None):
         """
         Overview:
             Initializes the Trainer instance.
@@ -27,18 +26,33 @@ class Trainer:
         """
         self.config = config
         self.env = env
-
         self.model = LSTMPPOModel(config, self.env.getStateSize(), self.env.getActionSize())
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=config['lr'])
         
-        self.entropy_coef = config["entropy_coef"]["start"]
-        self.entropy_coef_step = (config['entropy_coef']["start"] - config['entropy_coef']['end']) / config['entropy_coef']['step']
         
         if writer_path is not None:
             self.writer = Writer(writer_path)
-        
+        if save_path is not None:
+            self.save_path = save_path
+
         self.agent = Agent(self.env, self.model, config)
         self.distribution = Distribution()
+
+        try:
+            self.model.load_state_dict(torch.load(f'{save_path}model.pt'))
+            with open(f"{save_path}stat.json","r") as f:
+                self.data = json.load(f)
+            print('PROGRESS RESTORED!')
+        except:
+            print("TRAIN FROM BEGINING!")
+            self.data = {
+                "step":0,
+                "entropy_coef":config["entropy_coef"]["start"]
+            }
+
+        self.entropy_coef = self.data["entropy_coef"]
+        self.entropy_coef_step = (config['entropy_coef']["start"] - config['entropy_coef']['end']) / config['entropy_coef']['step']
+        
 
     def _entropy_coef_schedule(self):
         self.entropy_coef -= self.entropy_coef_step
@@ -95,7 +109,6 @@ class Trainer:
             - write_data: (`bool`): Whether to write data to Tensorboard or not.
         """
         training = True
-        step = 0
 
         while training:
             win_rate = self.agent.run(num_games=self.config["num_game_per_batch"])
@@ -142,7 +155,7 @@ class Trainer:
                     if write_data:
                         with torch.no_grad():
                             self.writer.add(
-                                step        = step,
+                                step        = self.data["step"],
                                 win_rate    = win_rate,
                                 reward      = self.agent.rollout.batch["rewards"].mean(),
                                 entropy     = entropy,
@@ -153,17 +166,22 @@ class Trainer:
                                 kl_max      = Kl.max().item(),
                                 kl_min      = Kl.min().item()
                             )
-                            step += 1
 
+                            self._save_log()
+                        
+                 
+            self._save_model()
             self.agent.rollout.reset_data()
 
-    def _save_model(model: LSTMPPOModel, path):
+    def _save_model(self):
         """
         Overview:
-            Saves the model's state dictionary to a file.
-
-        Arguments:
-            - model: (`LSTMPPOModel`): The model instance.
-            - path: (`str`): The path to save the model file.
+            Saves the model and other data.
         """
-        torch.save(model.state_dict(), path)
+        torch.save(self.model.state_dict(), f'{self.save_path}model.pt')
+        with open(f"{self.save_path}stat.json","w") as f:
+                json.dump(self.data,f)
+
+    def _save_log(self):
+        self.data["step"]+=1
+        self.data["entropy_coef"] = self.entropy_coef
