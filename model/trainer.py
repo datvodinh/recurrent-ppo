@@ -153,21 +153,24 @@ class Trainer:
                             self._entropy_coef_schedule()
 
                     if write_data:
-                        with torch.no_grad():
-                            self.writer.add(
-                                step        = self.data["step"],
-                                win_rate    = win_rate,
-                                reward      = self.agent.rollout.batch["rewards"].mean(),
-                                entropy     = entropy,
-                                actor_loss  = actor_loss,
-                                critic_loss = critic_loss,
-                                total_loss  = total_loss,
-                                kl_mean     = Kl.mean().item(),
-                                kl_max      = Kl.max().item(),
-                                kl_min      = Kl.min().item()
-                            )
-                            
-                            self._save_log()
+                        try:
+                            with torch.no_grad():
+                                self.writer.add(
+                                    step        = self.data["step"],
+                                    win_rate    = win_rate,
+                                    reward      = self.agent.rollout.batch["rewards"].mean(),
+                                    entropy     = entropy,
+                                    actor_loss  = actor_loss,
+                                    critic_loss = critic_loss,
+                                    total_loss  = total_loss,
+                                    kl_mean     = Kl.mean().item(),
+                                    kl_max      = Kl.max().item(),
+                                    kl_min      = Kl.min().item()
+                                )
+                                
+                                self._save_log()
+                        except:
+                            pass
                         
             if (self.data["step"]%200)==0:
                 self._save_model()
