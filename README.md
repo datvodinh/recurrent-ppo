@@ -9,9 +9,9 @@ This project explores the combination of Proximal Policy Optimization (PPO) and 
 ## Graph
 
 `Forward`
-![](img/PPO-LSTM%20Graph.png)
+![](img/PPO-LSTM%20Graph.svg)
 `Backward`
-![](img/Backward%20Graph.png)
+![](img/Backward%20Graph.svg)
 ## Installation
 
 1. Clone the repository:
