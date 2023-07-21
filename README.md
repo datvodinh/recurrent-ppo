@@ -6,6 +6,12 @@
 ## Introduction
 This project explores the combination of Proximal Policy Optimization (PPO) and Long Short-Term Memory (LSTM) networks in reinforcement learning tasks. PPO is a popular policy optimization algorithm, while LSTM is a type of recurrent neural network that is capable of capturing temporal dependencies in sequential data. The goal of this project is to leverage the benefits of both PPO and LSTM to enhance the performance of reinforcement learning agents.
 
+## Graph
+
+`Forward`
+![](img/PPO-LSTM%20Graph.png)
+`Backward`
+![](img/Backward%20Graph.png)
 ## Installation
 
 1. Clone the repository:
