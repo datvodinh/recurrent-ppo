@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import json
+import os
 
 torch.manual_seed(9999)
 np.random.seed(9999)
@@ -37,6 +38,12 @@ class Trainer:
 
         self.agent = Agent(self.env, self.model, config)
         self.distribution = Distribution()
+
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+            print("Directory created:", save_path)
+        else:
+            print("Directory already exists:", save_path)
 
         try:
             self.model.load_state_dict(torch.load(f'{save_path}model.pt'))
