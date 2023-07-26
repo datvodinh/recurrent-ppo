@@ -129,7 +129,7 @@ class Trainer:
 
                 for mini_batch in mini_batch_generator:
                     B, S                   = mini_batch["states"].shape
-                    mini_batch["states"]   = mini_batch["states"].view(B // self.config["LSTM"]["seq_length"], self.config["LSTM"]["seq_length"], S)
+                    mini_batch["states"]   = mini_batch["states"].view(B // self.agent.rollout.actual_sequence_length, self.agent.rollout.actual_sequence_length, S)
                     pol_new, val_new, _, _ = self.model(mini_batch["states"], mini_batch["h_states"].unsqueeze(0), mini_batch["c_states"].unsqueeze(0))
                     val_new                = val_new.squeeze(1)
 
