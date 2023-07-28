@@ -22,7 +22,6 @@ class LSTMPPOModel(nn.Module):
         if config["encode_state"]:
             self.encoder = nn.Sequential(
                 self._layer_init(nn.Linear(state_size,config["LSTM"]["embed_size"])),
-                nn.Tanh()
                 )
             self.lstm= nn.LSTM(config["LSTM"]["embed_size"],config["LSTM"]["hidden_size"],batch_first=True)
         else:
