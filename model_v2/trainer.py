@@ -89,9 +89,9 @@ class Trainer:
         returns = value + advantage
 
         if self.config["normalize_advantage"]:
-            advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
+            advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-5)
 
-        ratios     = torch.exp(log_prob_new - log_prob.detach())
+        ratios     = torch.exp(torch.clamp(log_prob_new-log_prob.detach(),min=-5.,max=2.))
         R_dot_A    = ratios * advantage
         actor_loss = -torch.where(
             (Kl >= self.config["PPO"]["policy_kl_range"]) & (R_dot_A > advantage),
