@@ -29,5 +29,9 @@ pip install -r requirements.txt
 ## Run
 
 ```
-Open main.ipynb -> Run All
+Open main.ipynb in Colab -> Run All
 ```
+
+## Update
+- model_v2: split network, normalize state (running mean and var), use GRU (instead of LSTM)
+- model: shared network, LSTM. 

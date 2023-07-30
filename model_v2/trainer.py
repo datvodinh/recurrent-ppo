@@ -8,10 +8,10 @@ import os
 torch.manual_seed(9999)
 np.random.seed(9999)
 
-from model.model import LSTMPPOModel
-from model.agent import Agent
-from model.writer import Writer
-from model.distribution import Distribution
+from model_v2.model import LSTMPPOModel
+from model_v2.agent import Agent
+from model_v2.writer import Writer
+from model_v2.distribution import Distribution
 
 class Trainer:
     """Trainer class for training the model"""
@@ -92,7 +92,6 @@ class Trainer:
             advantage = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
 
         ratios     = torch.exp(log_prob_new - log_prob.detach())
-
         R_dot_A    = ratios * advantage
         actor_loss = -torch.where(
             (Kl >= self.config["PPO"]["policy_kl_range"]) & (R_dot_A > advantage),
@@ -128,9 +127,12 @@ class Trainer:
                 mini_batch_generator = self.agent.rollout.mini_batch_generator()
 
                 for mini_batch in mini_batch_generator:
-                    B, S                   = mini_batch["states"].shape
-                    mini_batch["states"]   = mini_batch["states"].view(B // self.agent.rollout.actual_sequence_length, self.agent.rollout.actual_sequence_length, S)
-                    pol_new, val_new, _, _ = self.model(mini_batch["states"], mini_batch["h_states"].unsqueeze(0), mini_batch["c_states"].unsqueeze(0))
+                    
+                    pol_new, val_new, _, _ = self.model(mini_batch["states"],
+                                                        mini_batch["p_states"].unsqueeze(0),
+                                                        mini_batch["v_states"].unsqueeze(0),
+                                                        seq_length=self.agent.rollout.actual_sequence_length)
+                    
                     val_new                = val_new.squeeze(1)
 
                     log_prob_new, entropy  = self.distribution.log_prob(pol_new, mini_batch["actions"].view(1, -1), mini_batch["action_mask"])
