@@ -116,5 +116,4 @@ class Agent():
         """
         win_rate = self.env.run(self.play, num_games, np.array([0.]), 1)[0] / num_games
         self.rms.update()
-        print(self.rms.mean[:5],self.rms.var[:5], win_rate)
         return win_rate
